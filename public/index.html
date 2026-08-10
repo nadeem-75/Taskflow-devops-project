@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>TaskFlow</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <header>
+
+        <div class="logo">
+            TaskFlow
+        </div>
+
+        <div class="tagline">
+            Manage your work. Stay productive.
+        </div>
+
+    </header>
+
+
+    <main>
+
+        <section class="hero">
+
+            <h1>Task Management Made Simple</h1>
+
+            <p>
+                Organize your tasks and track your progress.
+            </p>
+
+        </section>
+
+
+        <section class="task-section">
+
+            <div class="add-task">
+
+                <input
+                    type="text"
+                    id="taskInput"
+                    placeholder="Enter a new task..."
+                >
+
+                <button onclick="addTask()">
+                    Add Task
+                </button>
+
+            </div>
+
+
+            <div class="task-header">
+
+                <h2>My Tasks</h2>
+
+                <span id="taskCount">
+                    0 tasks
+                </span>
+
+            </div>
+
+
+            <div id="taskList"></div>
+
+        </section>
+
+    </main>
+
+
+    <footer>
+
+        <p>
+            TaskFlow | Node.js DevOps Project
+        </p>
+
+        <p>
+            Docker • Jenkins • Kubernetes
+        </p>
+
+    </footer>
+
+
+    <script>
+
+        async function loadTasks() {
+
+            const response =
+                await fetch("/api/tasks");
+
+            const tasks =
+                await response.json();
+
+            displayTasks(tasks);
+        }
+
+
+        function displayTasks(tasks) {
+
+            const taskList =
+                document.getElementById("taskList");
+
+            const taskCount =
+                document.getElementById("taskCount");
+
+            taskCount.textContent =
+                `${tasks.length} tasks`;
+
+            taskList.innerHTML = "";
+
+            tasks.forEach(task => {
+
+                const taskElement =
+                    document.createElement("div");
+
+                taskElement.className =
+                    "task";
+
+                if (task.completed) {
+
+                    taskElement.classList.add(
+                        "completed"
+                    );
+
+                }
+
+                taskElement.innerHTML = `
+
+                    <div class="task-info">
+
+                        <span class="task-title">
+                            ${task.title}
+                        </span>
+
+                    </div>
+
+                    <div class="actions">
+
+                        <button
+                            onclick="toggleTask(${task.id})"
+                        >
+                            ${task.completed
+                                ? "Undo"
+                                : "Complete"}
+                        </button>
+
+                        <button
+                            onclick="deleteTask(${task.id})"
+                        >
+                            Delete
+                        </button>
+
+                    </div>
+                `;
+
+                taskList.appendChild(taskElement);
+
+            });
+
+        }
+
+
+        async function addTask() {
+
+            const input =
+                document.getElementById("taskInput");
+
+            const title =
+                input.value.trim();
+
+            if (!title) {
+
+                alert("Please enter a task.");
+
+                return;
+            }
+
+            await fetch("/api/tasks", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body: JSON.stringify({
+                    title: title
+                })
+
+            });
+
+            input.value = "";
+
+            loadTasks();
+        }
+
+
+        async function toggleTask(id) {
+
+            await fetch(`/api/tasks/${id}`, {
+
+                method: "PUT"
+
+            });
+
+            loadTasks();
+        }
+
+
+        async function deleteTask(id) {
+
+            await fetch(`/api/tasks/${id}`, {
+
+                method: "DELETE"
+
+            });
+
+            loadTasks();
+        }
+
+
+        loadTasks();
+
+    </script>
+
+</body>
+
+</html>
