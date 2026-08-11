@@ -32,7 +32,7 @@ pipeline {
 
             steps {
 
-                git 'YOUR_GITHUB_REPOSITORY_URL'
+                git 'https://github.com/nadeem-75/Taskflow-devops-project/tree/main'
 
             }
 
@@ -152,11 +152,11 @@ pipeline {
                         toolName: 'docker'
                     ) {
 
-                        sh 'docker-scout quickview YOUR_DOCKER_USERNAME/taskflow:latest'
+                        sh 'docker-scout quickview sknadeem786/taskflow:latest'
 
-                        sh 'docker-scout cves YOUR_DOCKER_USERNAME/taskflow:latest'
+                        sh 'docker-scout sknadeem786/taskflow:latest'
 
-                        sh 'docker-scout recommendations YOUR_DOCKER_USERNAME/taskflow:latest'
+                        sh 'docker-scout recommendations sknadeem786/taskflow:latest'
 
                     }
 
@@ -177,7 +177,7 @@ pipeline {
                 docker run -d \
                 --name taskflow \
                 -p 3000:3000 \
-                YOUR_DOCKER_USERNAME/taskflow:latest
+                sknadeem786/taskflow:latest
                 '''
 
             }
@@ -203,7 +203,7 @@ pipeline {
                 URL: ${env.BUILD_URL}
                 """,
 
-                to: 'YOUR_EMAIL@gmail.com',
+                to: 'nadeemshaik55036@gmail.com',
 
                 mimeType: 'text/html',
 
