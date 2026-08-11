@@ -1,0 +1,217 @@
+pipeline {
+
+    agent any
+
+    tools {
+
+        jdk 'jdk17'
+
+        nodejs 'node23'
+
+    }
+
+    environment {
+
+        SCANNER_HOME = tool 'sonar-scanner'
+
+    }
+
+    stages {
+
+        stage("clean workspace") {
+
+            steps {
+
+                cleanWs()
+
+            }
+
+        }
+
+        stage("Git Checkout") {
+
+            steps {
+
+                git 'YOUR_GITHUB_REPOSITORY_URL'
+
+            }
+
+        }
+
+        stage("Sonarqube Analysis") {
+
+            steps {
+
+                withSonarQubeEnv('sonar-server') {
+
+                    sh '''
+                    $SCANNER_HOME/bin/sonar-scanner \
+                    -Dsonar.projectName=taskflow \
+                    -Dsonar.projectKey=taskflow
+                    '''
+
+                }
+
+            }
+
+        }
+
+        stage("Code Quality Gate") {
+
+            steps {
+
+                script {
+
+                    waitForQualityGate(
+                        abortPipeline: false,
+                        credentialsId: 'Sonar-token'
+                    )
+
+                }
+
+            }
+
+        }
+
+        stage("Install NPM Dependencies") {
+
+            steps {
+
+                sh "npm install"
+
+            }
+
+        }
+
+        stage("OWASP FS SCAN") {
+
+            steps {
+
+                dependencyCheck(
+                    additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit -n',
+                    odcInstallation: 'DP-Check'
+                )
+
+                dependencyCheckPublisher(
+                    pattern: '**/dependency-check-report.xml'
+                )
+
+            }
+
+        }
+
+        stage("Trivy File Scan") {
+
+            steps {
+
+                sh "trivy fs . > trivy.txt"
+
+            }
+
+        }
+
+        stage("Build Docker Image") {
+
+            steps {
+
+                sh "docker build -t taskflow ."
+
+            }
+
+        }
+
+        stage("Tag & Push to DockerHub") {
+
+            steps {
+
+                script {
+
+                    withDockerRegistry(credentialsId: 'docker') {
+
+                        sh """
+                        docker tag taskflow YOUR_DOCKER_USERNAME/taskflow:latest
+                        docker push YOUR_DOCKER_USERNAME/taskflow:latest
+                        """
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        stage("Docker Scout Image") {
+
+            steps {
+
+                script {
+
+                    withDockerRegistry(
+                        credentialsId: 'docker',
+                        toolName: 'docker'
+                    ) {
+
+                        sh 'docker-scout quickview YOUR_DOCKER_USERNAME/taskflow:latest'
+
+                        sh 'docker-scout cves YOUR_DOCKER_USERNAME/taskflow:latest'
+
+                        sh 'docker-scout recommendations YOUR_DOCKER_USERNAME/taskflow:latest'
+
+                    }
+
+                }
+
+            }
+
+        }
+
+        stage("Deploy to Container") {
+
+            steps {
+
+                sh '''
+                docker stop taskflow || true
+                docker rm taskflow || true
+
+                docker run -d \
+                --name taskflow \
+                -p 3000:3000 \
+                YOUR_DOCKER_USERNAME/taskflow:latest
+                '''
+
+            }
+
+        }
+
+    }
+
+    post {
+
+        always {
+
+            emailext(
+                attachLog: true,
+
+                subject: "'${currentBuild.result}'",
+
+                body: """
+                Project: ${env.JOB_NAME}
+
+                Build Number: ${env.BUILD_NUMBER}
+
+                URL: ${env.BUILD_URL}
+                """,
+
+                to: 'YOUR_EMAIL@gmail.com',
+
+                mimeType: 'text/html',
+
+                attachmentsPattern: 'trivy.txt'
+            )
+
+        }
+
+    }
+
+}
