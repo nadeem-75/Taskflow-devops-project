@@ -129,8 +129,8 @@ pipeline {
                     withDockerRegistry(credentialsId: 'docker') {
 
                         sh """
-                        docker tag taskflow YOUR_DOCKER_USERNAME/taskflow:latest
-                        docker push YOUR_DOCKER_USERNAME/taskflow:latest
+                        docker tag taskflow sknadeem786/taskflow:latest
+                        docker push sknadeem786/taskflow:latest
                         """
 
                     }
