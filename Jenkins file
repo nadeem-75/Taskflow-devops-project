@@ -32,7 +32,8 @@ pipeline {
 
             steps {
 
-                git 'https://github.com/nadeem-75/Taskflow-devops-project/tree/main'
+                git branch: 'main',
+                    url: 'https://github.com/nadeem-75/Taskflow-devops-project.git'
 
             }
 
@@ -145,22 +146,11 @@ pipeline {
 
             steps {
 
-                script {
+                sh 'docker scout quickview sknadeem786/taskflow:latest'
 
-                    withDockerRegistry(
-                        credentialsId: 'docker',
-                        toolName: 'docker'
-                    ) {
+                sh 'docker scout cves sknadeem786/taskflow:latest'
 
-                        sh 'docker-scout quickview sknadeem786/taskflow:latest'
-
-                        sh 'docker-scout sknadeem786/taskflow:latest'
-
-                        sh 'docker-scout recommendations sknadeem786/taskflow:latest'
-
-                    }
-
-                }
+                sh 'docker scout recommendations sknadeem786/taskflow:latest'
 
             }
 
@@ -191,6 +181,7 @@ pipeline {
         always {
 
             emailext(
+
                 attachLog: true,
 
                 subject: "'${currentBuild.result}'",
@@ -208,6 +199,7 @@ pipeline {
                 mimeType: 'text/html',
 
                 attachmentsPattern: 'trivy.txt'
+
             )
 
         }
