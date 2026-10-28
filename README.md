@@ -161,22 +161,26 @@ Then open Grafana and use the built-in Kubernetes dashboards to view pod and nod
 ### 1. TaskFlow application running
 The app deployed by the pipeline and running on port 3000.
 
-![TaskFlow App](images/01-taskflow-app.png)
+<img width="1858" height="965" alt="Screenshot 2026-08-19 010244" src="https://github.com/user-attachments/assets/24456096-7bdf-4a1a-a528-57428d37c623" />
+
 
 ### 2. Jenkins pipeline
 Pipeline stages from clean workspace to deploying the container.
 
-![Jenkins Pipeline](images/02-jenkins-pipeline.png)
+<img width="1451" height="292" alt="Screenshot 2026-08-19 010332" src="https://github.com/user-attachments/assets/cfeaae04-c4e3-4cd0-963e-aa10d245bffe" />
+
 
 ### 3. SonarQube code quality report
-The quality gate passed with 0 bugs, 0 vulnerabilities, and 0 code smells.
+The quality gate passed with 0 bugs, 0 vulnerabilities, and 0 code smells
 
-![SonarQube Report](images/03-sonarqube-report.png)
+<img width="1396" height="377" alt="Screenshot 2026-08-18 234556" src="https://github.com/user-attachments/assets/3910f603-e3c9-4163-9637-b79bab81cab7" />
+
 
 ### 4. Docker Scout image scan
 Docker Scout scanned the image and reported vulnerabilities in the `node:20-alpine` base image, with a recommendation to update the base image. See the improvements below.
 
-![Docker Scout Scan](images/04-docker-scout-scan.png)
+<img width="1030" height="510" alt="Screenshot 2026-08-19 010838" src="https://github.com/user-attachments/assets/67aefeff-7b14-4e0d-9431-902bbc4ee1fe" />
+
 
 ## What I Learned
 
